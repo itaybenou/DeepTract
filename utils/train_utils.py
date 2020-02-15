@@ -3,7 +3,7 @@ from dipy.data import get_sphere
 from dipy.core.sphere import Sphere, HemiSphere
 from dipy.core.geometry import sphere_distance
 from dipy.reconst.shm import sph_harm_lookup, smooth_pinv
-from data_handling import *
+from utils.data_handling import *
 
 
 def calc_mean_dwi(dwi, mask):
@@ -29,8 +29,8 @@ def get_geometrical_labels(streamlines):
     return d_labels
 
 
-def smooth_labels(directions, Num_outputs=725):
-    smoothed_labels = np.zeros((directions.shape[0], directions.shape[1], Num_outputs), np.float32)
+def smooth_labels(directions, num_outputs=725):
+    smoothed_labels = np.zeros((directions.shape[0], directions.shape[1], num_outputs), np.float32)
     sphere_points = get_sphere('repulsion724')
 
     for i in range(directions.shape[0]):

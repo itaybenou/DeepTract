@@ -9,7 +9,7 @@ class Parameters(object):
         """ Model Parameters """
 
         # architecture_params - (list) Set number of neurons in each layer.
-        self.params['architecture_params'] = [1000, 1000, 1000, 1000]
+        self.params['layers_size'] = [1000, 1000, 1000, 1000]
 
         # use_dropout - (bool) Use dropout if "True"
         self.params['use_dropout'] = True
@@ -54,6 +54,9 @@ class Parameters(object):
         # does not improve.
         self.params['early_stopping_patience'] = 5
 
+        # save_checkpoints - (bool) Whether to save model checkpoints during training.
+        self.params['save_checkpoints'] = True
+
         """ Data Parameters """
 
         # DWI_path - (string) Path to the input DWI directory (should include .nii, .bvecs and .bvals files).
@@ -63,7 +66,7 @@ class Parameters(object):
         self.params['voxel_size'] = [2, 2, 2]
 
         # tractogram_path - (string) Path to a tractogram (.trk file) to be used as training labels.
-        self.params['DWI_path'] = "./data/labels/tractography.trk"
+        self.params['tractogram_path'] = "./data/labels/tractography.trk"
 
         # brain_mask_path - (string) Path to a binary brain mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
@@ -96,10 +99,10 @@ class Parameters(object):
         self.params['tractography_type'] = 'deterministic'
 
         # N_seeds - (int) Number of seed points for tractography.
-        self.params['wm_mask_path'] = 400000
+        self.params['N_seeds'] = 400000
 
         # step_size - (float) Tractography step size (in voxels).
-        self.params['wm_mask_path'] = 0.5
+        self.params['step_size'] = 0.5
 
         # max_angle - (float) Maximum allowed streamline angle (in degrees).
         self.params['max_angle'] = 60
