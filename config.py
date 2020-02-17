@@ -1,4 +1,4 @@
-from keras.optimizers import *
+from keras.optimizers import Adam, SGD, RMSprop
 
 
 class Parameters(object):
@@ -9,7 +9,7 @@ class Parameters(object):
         """ Model Parameters """
 
         # architecture_params - (list) Set number of neurons in each layer.
-        self.params['layers_size'] = [1000, 1000, 1000, 1000]
+        self.params['layers_size'] = [1000, 1000, 1000]
 
         # use_dropout - (bool) Use dropout if "True"
         self.params['use_dropout'] = True
@@ -21,7 +21,7 @@ class Parameters(object):
         self.params['model_name'] = 'DeepTract'
 
         # model_weights_save_dir - (string) Path for saving the model's files after training is done.
-        self.params['model_weights_save_dir'] = "./trained_model"
+        self.params['model_weights_save_dir'] = "D:/itay/Dev/Repos/DeepTract/trained_model"
 
         """ Training Parameters """
 
@@ -32,7 +32,7 @@ class Parameters(object):
         self.params['optimizer'] = Adam
 
         # batch_size - (int) Data batch size for training.
-        self.params['batch_size'] = 8
+        self.params['batch_size'] = 16
 
         # epochs - (int) Number of training epochs.
         self.params['epochs'] = 50
@@ -60,46 +60,37 @@ class Parameters(object):
         """ Data Parameters """
 
         # DWI_path - (string) Path to the input DWI directory (should include .nii, .bvecs and .bvals files).
-        self.params['DWI_path'] = "./data/dwi"
+        self.params['DWI_path'] = "D:/itay/Dev/Repos/DeepTract/data/dwi"
 
         # voxel_size - (list) DWI's voxel dimensions (in mm).
         self.params['voxel_size'] = [2, 2, 2]
 
         # tractogram_path - (string) Path to a tractogram (.trk file) to be used as training labels.
-        self.params['tractogram_path'] = "./data/labels/tractography.trk"
-
-        # brain_mask_path - (string) Path to a binary brain mask file that will be applied to the input DWI volume.
-        # Insert None if such mask is not available.
-        self.params['DWI_mask_path'] = "./data/mask/brain_mask.nii.gz"
-
-        # wm_mask_path - (string) Path to a binary white natter mask file that will be applied to the input DWI volume.
-        # Insert None if such mask is not available.
-        self.params['DWI_mask_path'] = "./data/mask/wm_mask.nii.gz"
+        # NOTE: only relevant for training, not for tracking stage.
+        self.params['tractogram_path'] = "D:/itay/Dev/Repos/DeepTract/data/labels/tractography.trk"
 
         # train_val_ratio - (float [0, 1]) Training/Validation split ratio for training.
+        # NOTE: only relevant for training, not for tracking stage.
         self.params['train_val_ratio'] = 0.9
-
-        """ Inference (test-phase tractography) Parameters """
-
-        # model_load_path - Path to the trained model's files (should include a .json and .hdf5 files).
-        self.params['model_load_path'] = "./trained_model"
-
-        # test_DWI_path - (string) Path to the tractography input DWI (.nii file).
-        self.params['test_DWI_path'] = "./data/dwi/DWI.nii.gz"
 
         # brain_mask_path - (string) Path to a binary brain mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
-        self.params['brain_mask_path'] = "./data/mask/brain_mask.nii.gz"
+        self.params['brain_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/mask/brain_mask.nii.gz"
 
         # wm_mask_path - (string) Path to a binary white natter mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
-        self.params['wm_mask_path'] = "./data/mask/wm_mask.nii.gz"
+        self.params['wm_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/wm_mask/wm_mask.nii.gz"
+
+        """ Tracking (post-training tractography) Parameters """
+
+        # model_load_path - Path to the trained model's files (should include a .json and .hdf5 files).
+        self.params['trained_model_dir'] = "D:/itay/Dev/Repos/DeepTract/trained_model"
 
         # tractography_type - (string) 'deterministic' or 'probabilistic'
         self.params['tractography_type'] = 'deterministic'
 
-        # N_seeds - (int) Number of seed points for tractography.
-        self.params['N_seeds'] = 400000
+        # num_seeds - (int) Number of seed points for tractography.
+        self.params['num_seeds'] = 400000
 
         # step_size - (float) Tractography step size (in voxels).
         self.params['step_size'] = 0.5

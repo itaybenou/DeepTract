@@ -5,7 +5,6 @@ import scipy.ndimage as ndimage
 from nibabel import streamlines
 
 
-
 def normalize_logits(logits):
     """
 INPUT: logits - tensor of size N x max_time_steps x #out_dirctions (N is the batch size)
@@ -157,6 +156,10 @@ OUTPUT: seed_points - zero-padded np array of size n x time_steps x 3, holding n
     padded_seed_points[:, 0, :] = seed_points
 
     return padded_seed_points
+
+
+def calc_entropy_threshold(entropy_params, tracking_steps):
+    return entropy_params[0] * np.exp(-np.arange(tracking_steps) / entropy_params[1]) + entropy_params[2]
 
 
 def output_tractogram(streamlines_list):

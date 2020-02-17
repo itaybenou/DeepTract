@@ -12,13 +12,17 @@ from dipy.io import read_bvals_bvecs
 
 class DataHandler(object):
 
-    def __init__(self, **args):
+    def __init__(self, params, mode):
 
-        self.params = args['params']
+        # self.params = args['params']
+        self.params = params
         self.dwi_path = self.params['DWI_path']
-        self.brain_mask_path =self.params['brain_mask_path']
+        self.brain_mask_path = self.params['brain_mask_path']
         self.wm_mask_path = self.params['wm_mask_path']
-        self.tractogram_path = self.params['tractogram_path']
+        if mode == 'train':
+            self.tractogram_path = self.params['tractogram_path']
+        else:
+            self.tractogram_path = None
         self.voxel_size = self.params['voxel_size']
         self.max_val = 255
 
@@ -35,6 +39,7 @@ class DataHandler(object):
             self.brain_mask = self.load_mask(self.brain_mask_path)
         if self.wm_mask_path is not None:
             self.wm_mask = self.load_mask(self.wm_mask_path)
+            self.wm_mask = self.wm_mask[::2, ::2, ::2]
         if self.tractogram_path is not None:
             self.load_tractogram()
 
@@ -57,7 +62,8 @@ class DataHandler(object):
         dwi_data = nib.load(mask_path)
         return dwi_data.get_data().astype("float32")
 
-    def normalize_dwi(self, b0):
+    @staticmethod
+    def normalize_dwi(weights, b0):
         """ Normalize dwi by the first b0.
         Parameters:
         -----------
@@ -70,7 +76,6 @@ class DataHandler(object):
         ndarray
             Diffusion weights normalized by the B0.
         """
-        weights = self.dwi
         b0 = b0[..., None]  # Easier to work if it is a 4D array.
 
         # Make sure in every voxels weights are lower than ones from the b0.
@@ -84,11 +89,11 @@ class DataHandler(object):
 
         return weights_normed
 
-    def get_spherical_harmonics_coefficients(self, sh_order=8, smooth=0.006):
+    def get_spherical_harmonics_coefficients(self, dwi_weights, bvals, bvecs, sh_order=8, smooth=0.006):
         """ Compute coefficients of the spherical harmonics basis.
         Parameters
         -----------
-        dwi : `nibabel.NiftiImage` object
+        dwi_weights : `nibabel.NiftiImage` object
             Diffusion signal as weighted images (4D).
         bvals : ndarray shape (N,)
             B-values used with each direction.
@@ -106,10 +111,6 @@ class DataHandler(object):
             coeffs depends on `sh_order`.
         """
 
-        bvals = np.asarray(self.bvals)
-        bvecs = np.asarray(self.bvecs)
-        dwi_weights = self.dwi
-
         # Exract the averaged b0.
         b0_idx = bvals == 0
         b0 = dwi_weights[..., b0_idx].mean(axis=3) + 1e-10
@@ -123,7 +124,7 @@ class DataHandler(object):
         raw_sphere = HemiSphere(xyz=bvecs)
 
         # Fit SH to signal
-        sph_harm_basis = sph_harm_lookup.get('mrtrix')
+        sph_harm_basis = sph_harm_lookup.get("tournier07")
         Ba, m, n = sph_harm_basis(sh_order, raw_sphere.theta, raw_sphere.phi)
         L = -n * (n + 1)
         invB = smooth_pinv(Ba, np.sqrt(smooth) * L)
@@ -149,7 +150,7 @@ class DataHandler(object):
         if directions is not None:
             sphere = Sphere(xyz=directions)
 
-        sph_harm_basis = sph_harm_lookup.get('mrtrix')
+        sph_harm_basis = sph_harm_lookup.get("tournier07")
         Ba, m, n = sph_harm_basis(sh_order, sphere.theta, sphere.phi)
         data_resampled = np.dot(data_sh, Ba.T)
 
