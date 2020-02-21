@@ -92,6 +92,9 @@ class Parameters(object):
         # num_seeds - (int) Number of seed points for tractography.
         self.params['num_seeds'] = 400000
 
+        # track_batch_size - (int) Number of streamlines tracked simultaneously.
+        self.params['track_batch_size'] = 500
+
         # step_size - (float) Tractography step size (in voxels).
         self.params['step_size'] = 0.5
 

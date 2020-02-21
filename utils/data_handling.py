@@ -19,6 +19,7 @@ class DataHandler(object):
         self.dwi_path = self.params['DWI_path']
         self.brain_mask_path = self.params['brain_mask_path']
         self.wm_mask_path = self.params['wm_mask_path']
+        assert mode in ['train', 'track'], 'mode must be either train or track.'
         if mode == 'train':
             self.tractogram_path = self.params['tractogram_path']
         else:
@@ -221,6 +222,19 @@ OUTPUT: lengths - a np array (vector) of length N, holding the #points in each f
         lengths[i] = streamlines_list[i].shape[0]
 
     return lengths
+
+
+def calc_mean_dwi(dwi, mask):
+    DW_means = np.zeros(dwi.shape[3])
+    for i in range(len(DW_means)):
+        curr_volume = dwi[:, :, :, i]
+        if len(mask) > 0:
+            curr_volume = curr_volume[mask > 0]
+        else:
+            curr_volume = curr_volume[curr_volume > 0]
+        DW_means[i] = np.mean(curr_volume)
+
+    return DW_means
 
 
 def get_file_path(curr_path, target_dir, extension):

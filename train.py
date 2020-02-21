@@ -47,12 +47,10 @@ class Trainer(object):
     def get_model(self, grad_directions):
 
         # Num of steps in each batch
-        max_streamline_length = np.max(get_streamlines_lengths(self.data_handler.tractogram))
-        time_steps = int(max_streamline_length)
-
-        self.model = DeepTract_network(time_steps, grad_directions, self.layers_size,
+        max_streamline_length = int(np.max(self.data_handler.tractogram._lengths))
+        self.model = DeepTract_network(max_streamline_length, grad_directions, self.layers_size,
                                        self.output_size, self.use_dropout, self.dropout_prob)
-        return time_steps
+        return max_streamline_length
 
     def train(self):
 
@@ -77,7 +75,8 @@ class Trainer(object):
         loss = categorical_crossentropy
 
         # Compile model
-        self.model.compile(loss=loss, optimizer=optimizer, metrics=[categorical_accuracy, sequence_top_k_categorical_accuracy])
+        self.model.compile(loss=loss, optimizer=optimizer,
+                           metrics=[categorical_accuracy, sequence_top_k_categorical_accuracy])
 
         # Set callbacks
         callbacks = []

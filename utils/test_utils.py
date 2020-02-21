@@ -127,19 +127,16 @@ OUTPUT: theta_mat = dxd symmetric matrix, where theta_mat[i,j]=angle(vi,vj) in d
     return theta_mat_deg
 
 
-def init_seeds(WM_mask, n_seeds, time_steps):
+def init_seeds(WM_mask, n_seeds):
     """
 INPUT: a binary WM mask - np array of size XxYxZ with "1" in WM voxels, "0" othwerwise
        n_seeds - how many seed points to draw
-       time_steps - length of the RNN graph
 
-OUTPUT: seed_points - zero-padded np array of size n x time_steps x 3, holding n random points within the WM_mask
+OUTPUT: seed_points - zero-padded np array of size n x 3, holding n random points within the WM_mask
 """
 
     mask_idxs = 0.5 * np.array(np.nonzero(WM_mask)).T
-    seed_points = np.zeros((n_seeds, 3))
     seed_points = mask_idxs[random.sample(range(len(mask_idxs)), n_seeds)]
-
     return seed_points
 
 

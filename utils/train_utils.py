@@ -4,19 +4,7 @@ from dipy.core.sphere import Sphere, HemiSphere
 from dipy.core.geometry import sphere_distance
 from dipy.reconst.shm import sph_harm_lookup, smooth_pinv
 from utils.data_handling import *
-
-
-def calc_mean_dwi(dwi, mask):
-    DW_means = np.zeros(dwi.shape[3])
-    for i in range(len(DW_means)):
-        curr_volume = dwi[:, :, :, i]
-        if len(mask) > 0:
-            curr_volume = curr_volume[mask > 0]
-        else:
-            curr_volume = curr_volume[curr_volume > 0]
-        DW_means[i] = np.mean(curr_volume)
-
-    return DW_means
+import threading
 
 
 def get_geometrical_labels(streamlines):
@@ -50,7 +38,7 @@ def smooth_labels(directions, num_outputs=725):
     return smoothed_labels
 
 
-def pad_and_convert2DWI(dwi_vol, X_batch, y_batch, max_length, DW_means):
+def pad_and_convert2dwi(dwi_vol, X_batch, y_batch, max_length, DW_means):
     """
     INPUT: data - list of len=batch size , with data[i].shape= time_steps(i) x #gradient_directions
            labels - list of len=batch size , with labels[i].shape= time_steps(i) x 3
@@ -66,9 +54,6 @@ def pad_and_convert2DWI(dwi_vol, X_batch, y_batch, max_length, DW_means):
         y_batch_padded[i, :y_batch[i].shape[0], :] = y_batch[i]
 
     return X_batch_padded, y_batch_padded
-
-
-import threading
 
 
 class ThreadSafeIterator:
@@ -97,16 +82,16 @@ def threadsafe_generator(f):
 
 
 @threadsafe_generator
-def train_generator(dwi_vol, X_list, y_list, N_time_steps, num_outputs, BATCH_SIZE, DW_means):
+def train_generator(dwi_vol, X_list, y_list, time_steps, num_outputs, batch_size, dw_means):
     while True:
         shuffle_indices = np.arange(len(X_list))
         shuffle_indices = np.random.permutation(shuffle_indices)
 
-        for start in range(0, len(X_list), BATCH_SIZE):
+        for start in range(0, len(X_list), batch_size):
             X_batch = []
             y_batch = []
 
-            end = min(start + BATCH_SIZE, len(X_list))
+            end = min(start + batch_size, len(X_list))
             idx_list = list(shuffle_indices[start:end])
 
             for idx in idx_list:
@@ -116,32 +101,32 @@ def train_generator(dwi_vol, X_list, y_list, N_time_steps, num_outputs, BATCH_SI
 
                 y_batch.append(y_list[idx])
                 # Add the label of the reversed streamline
-                y_batch.append(-y_list[idx])
+                y_batch.append(np.flip(-y_list[idx], axis=0))
 
-            X_batch_padded, y_batch_padded = pad_and_convert2DWI(dwi_vol, X_batch, y_batch, N_time_steps, DW_means)
+            X_batch_padded, y_batch_padded = pad_and_convert2dwi(dwi_vol, X_batch, y_batch, time_steps, dw_means)
             y_batch_padded_smooth = smooth_labels(y_batch_padded, num_outputs)
 
             yield X_batch_padded, y_batch_padded_smooth
 
 
 @threadsafe_generator
-def valid_generator(dwi_vol, X_list, y_list, N_time_steps, num_outputs, BATCH_SIZE, DW_means):
+def valid_generator(dwi_vol, X_list, y_list, time_steps, num_outputs, batch_size, dw_means):
     while True:
         shuffle_indices = np.arange(len(X_list))
         shuffle_indices = np.random.permutation(shuffle_indices)
 
-        for start in range(0, len(X_list), BATCH_SIZE):
+        for start in range(0, len(X_list), batch_size):
             X_batch = []
             y_batch = []
 
-            end = min(start + BATCH_SIZE, len(X_list))
+            end = min(start + batch_size, len(X_list))
             idx_list = list(shuffle_indices[start:end])
 
             for idx in idx_list:
                 X_batch.append(X_list[idx])
                 y_batch.append(y_list[idx])
 
-            X_batch_padded, y_batch_padded = pad_and_convert2DWI(dwi_vol, X_batch, y_batch, N_time_steps, DW_means)
+            X_batch_padded, y_batch_padded = pad_and_convert2dwi(dwi_vol, X_batch, y_batch, time_steps, dw_means)
             y_batch_padded_smooth = smooth_labels(y_batch_padded, num_outputs)
 
             yield X_batch_padded, y_batch_padded_smooth
