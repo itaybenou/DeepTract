@@ -42,7 +42,7 @@ class Parameters(object):
 
         # decay_LR_patience - (int) Number of training epochs to wait in case validation performance does not improve
         # before learning rate decay is applied.
-        self.params['decay_LR_patience'] = 5
+        self.params['decay_LR_patience'] = 2
 
         # decay_factor - (float [0, 1]) In an LR decay step, the existing LR will be multiplied by this factor.
         self.params['decay_factor'] = 0.5
@@ -89,8 +89,14 @@ class Parameters(object):
         # tractography_type - (string) 'deterministic' or 'probabilistic'
         self.params['tractography_type'] = 'deterministic'
 
+        # save_tractogram - (boolean) whether to save the resulting tractogram as a .trk file
+        self.params['save_tractogram'] = True
+
+        # save_dir - (boolean) full path for saving the output tractogram
+        self.params['save_dir'] = "D:/itay/Dev"
+
         # num_seeds - (int) Number of seed points for tractography.
-        self.params['num_seeds'] = 400000
+        self.params['num_seeds'] = 1100
 
         # track_batch_size - (int) Number of streamlines tracked simultaneously.
         self.params['track_batch_size'] = 500
@@ -102,7 +108,7 @@ class Parameters(object):
         self.params['max_angle'] = 60
 
         # max_length - (float) Maximum allowed streamline length (in mm).
-        self.params['max_angle'] = 200
+        self.params['max_length'] = 200
 
         # min_length - (float) Maximum allowed streamline length (in mm).
         self.params['min_length'] = 20

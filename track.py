@@ -6,6 +6,7 @@ from keras.models import model_from_json
 import logging
 from itertools import compress
 from tqdm import tqdm
+from nibabel import streamlines
 
 
 class Tracker:
@@ -28,11 +29,12 @@ class Tracker:
         else:
             self.logger = logger
 
-        self.data_handler = DataHandler(self.params)
         self.trained_model_dir = self.params['trained_model_dir']
         self.model = None
         self.load_model()
         self.data_handler = DataHandler(self.params, mode='track')
+        self.save_tractogram = self.params['save_tractogram']
+        self.save_dir = self.params['save_dir']
 
         self.dwi_means = None
         self.tractography_type = self.params['tractography_type']
@@ -65,9 +67,9 @@ class Tracker:
         """
         Returns a binary mask (WM / brain mask, if exist) to draw seed points from
         """
-        if not data_handler.wm_mask:
+        if data_handler.wm_mask.size > 0:
             return data_handler.wm_mask
-        elif not data_handler.brain_mask:
+        elif not data_handler.brain_mask.size > 0:
             return data_handler.brain_mask
         else:
             return np.ones_like(data_handler.dwi)
@@ -83,14 +85,13 @@ class Tracker:
             (np.vstack((angles724, np.zeros(angles724.shape[1]))), np.zeros((angles724.shape[0] + 1, 1))))
 
         dilated_wm_mask = mask_dilate(data_handler.wm_mask)
-        # angles_mat = calc_angles_matrix(sphere724)
         all_streamlines = []
 
-        for batch_idx in range(num_batches):
+        for batch_idx in tqdm(range(num_batches)):
             # Initialize dwi inputs
             start_idx = batch_idx*self.track_batch_size
             end_idx = min((batch_idx + 1)*self.track_batch_size, seed_points.shape[0])
-            seeds_batch = zero_pad_seeds(seed_points[start_idx:end_idx, :], len(seeds_batch), self.track_length)
+            seeds_batch = zero_pad_seeds(seed_points[start_idx:end_idx, :], end_idx-start_idx, self.track_length)
             dwi_inputs = np.zeros((seeds_batch.shape[0], seeds_batch.shape[1], len(self.dwi_means)))
             dwi_inputs[:, 0, :] = eval_volume_at_3d_coordinates(data_handler.dwi, seeds_batch[:, 0, :]) - self.dwi_means
             batch_streamlines = [np.expand_dims(seeds_batch[i, 0, :], axis=0) for i in range(seeds_batch.shape[0])]
@@ -102,9 +103,9 @@ class Tracker:
             inWM_mask = np.ones(len(dwi_inputs), dtype=bool)
 
             next_positions = seeds_batch[:, 0, :]
-            print('Tracking batch number ', batch_idx + 1, ' out of ', num_batches)
+            print('Tracking streamline batch number ', batch_idx + 1, ' out of ', num_batches)
 
-            for t_step in tqdm(range(self.track_length)):
+            for t_step in range(self.track_length):
 
                 # Predict streamline direction
                 pdf_pred = self.model.predict_on_batch(dwi_inputs)
@@ -133,7 +134,7 @@ class Tracker:
                 #     1 * (~entropy_mask), axis=1) * np.expand_dims(1 * (~angle_mask), axis=1) * np.expand_dims(
                 #     1 * (inWM_mask), axis=1)
 
-                next_positions = next_positions + self.step_size * direction_vec_pred * valids_mask
+                next_positions = next_positions + self.step_size * direction_vec_pred * np.expand_dims(1 * (valids_mask), axis=1)
                 if sum(1 * valids_mask) == 0:
                     break
 
@@ -146,7 +147,6 @@ class Tracker:
                     dwi_inputs[:, t_step + 1, :] = \
                         eval_volume_at_3d_coordinates(data_handler.dwi, next_positions) - self.dwi_means
 
-            print('\n')
             lengths_vec = fiber_lengths(batch_streamlines, [2, 2, 2])
             filtered_out_fibers = [batch_streamlines[k] for k in range(len(batch_streamlines)) if
                                    np.logical_and(lengths_vec[k] > self.min_length, lengths_vec[k] < self.max_length)]
@@ -158,7 +158,8 @@ class Tracker:
             #     DW_seeds = np.zeros((Loc_seeds.shape[0], Loc_seeds.shape[1], len(dwi_means)))
             #     DW_seeds[:, 0, :] = eval_volume_at_3d_coordinates(resampled_dwi, Loc_seeds[:, 0, :]) - dwi_means
 
-        return all_streamlines
+        tractogram = output_tractogram(all_streamlines)
+        return tractogram
 
     def track(self):
         """
@@ -175,7 +176,7 @@ class Tracker:
 
         # Set random seed points
         seed_mask = self.get_seed_mask(data_handler)
-        seed_points = init_seeds(seed_mask, self.num_seeds, self.track_length)
+        seed_points = init_seeds(seed_mask, self.num_seeds)
 
         # partition seeds into batches
         num_batches = int(self.num_seeds / self.track_batch_size)
@@ -183,5 +184,7 @@ class Tracker:
             num_batches += 1
 
         out_tractogram = self.streamline_tracking(data_handler, seed_points, num_batches)
+        if self.save_tractogram:
+            streamlines.save(tractogram=out_tractogram, filename=join(self.save_dir, 'out_tractogram.tck'))
 
         return out_tractogram

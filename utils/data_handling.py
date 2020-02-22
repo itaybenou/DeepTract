@@ -30,8 +30,8 @@ class DataHandler(object):
         self.dwi = None
         self.bvals = None
         self.bvecs = None
-        self.brain_mask = []
-        self.wm_mask = []
+        self.brain_mask = np.array([])
+        self.wm_mask = np.array([])
         self.tractogram = None
         if self.dwi_path is not None:
             self.load_dwi()
