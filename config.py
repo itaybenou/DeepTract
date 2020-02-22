@@ -35,7 +35,7 @@ class Parameters(object):
         self.params['batch_size'] = 16
 
         # epochs - (int) Number of training epochs.
-        self.params['epochs'] = 50
+        self.params['epochs'] = 30
 
         # decay_LR - (bool) Whether to use learning rate decay.
         self.params['decay_LR'] = True
@@ -45,7 +45,7 @@ class Parameters(object):
         self.params['decay_LR_patience'] = 2
 
         # decay_factor - (float [0, 1]) In an LR decay step, the existing LR will be multiplied by this factor.
-        self.params['decay_factor'] = 0.5
+        self.params['decay_factor'] = 0.6
 
         # early_stopping - (bool) Whether to use early stopping.
         self.params['early_stopping'] = True
