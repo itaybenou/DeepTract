@@ -28,11 +28,11 @@ class Parameters(object):
         # learning_rate -(float) Initial learning rate in training phase.
         self.params['learning_rate'] = 1e-4
 
-        # optimizer - (keras.optimizers) Optimizer to be used in training.
+        # optimizer - (keras.optimizers) Optimizer to be used in training (Adam/SGD/RMSprop).
         self.params['optimizer'] = Adam
 
         # batch_size - (int) Data batch size for training.
-        self.params['batch_size'] = 16
+        self.params['batch_size'] = 8
 
         # epochs - (int) Number of training epochs.
         self.params['epochs'] = 30
@@ -62,9 +62,6 @@ class Parameters(object):
         # DWI_path - (string) Path to the input DWI directory (should include .nii, .bvecs and .bvals files).
         self.params['DWI_path'] = "D:/itay/Dev/Repos/DeepTract/data/dwi"
 
-        # voxel_size - (list) DWI's voxel dimensions (in mm).
-        self.params['voxel_size'] = [2, 2, 2]
-
         # tractogram_path - (string) Path to a tractogram (.trk file) to be used as training labels.
         # NOTE: only relevant for training, not for tracking stage.
         self.params['tractogram_path'] = "D:/itay/Dev/Repos/DeepTract/data/labels/tractography.trk"
@@ -79,7 +76,7 @@ class Parameters(object):
 
         # wm_mask_path - (string) Path to a binary white natter mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
-        self.params['wm_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/wm_mask/wm_mask.nii.gz"
+        self.params['wm_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/wm_mask/wm_mask_resampled.nii.gz"
 
         """ Tracking (post-training tractography) Parameters """
 

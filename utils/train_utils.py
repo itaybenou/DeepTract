@@ -1,6 +1,7 @@
 import numpy as np
 from dipy.data import get_sphere
 from dipy.core.sphere import Sphere, HemiSphere
+from keras import backend as K
 from dipy.core.geometry import sphere_distance
 from dipy.reconst.shm import sph_harm_lookup, smooth_pinv
 from utils.data_handling import *
@@ -54,6 +55,21 @@ def pad_and_convert2dwi(dwi_vol, X_batch, y_batch, max_length, DW_means):
         y_batch_padded[i, :y_batch[i].shape[0], :] = y_batch[i]
 
     return X_batch_padded, y_batch_padded
+
+
+def sequence_top_k_categorical_accuracy(y_true, y_pred, k=5):
+    original_shape = K.shape(y_true)
+    y_true = K.reshape(y_true, (-1, K.shape(y_true)[-1]))
+    y_pred = K.reshape(y_pred, (-1, K.shape(y_pred)[-1]))
+    top_k = K.cast(K.in_top_k(y_pred, K.argmax(y_true, axis=-1), k), K.floatx())
+
+    return K.reshape(top_k, original_shape[:-1])
+
+
+def save_model(model, model_path):
+    model_json = model.to_json()
+    with open(model_path, "w", encoding='utf8') as json_file:
+        json_file.write(model_json)
 
 
 class ThreadSafeIterator:

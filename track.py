@@ -183,7 +183,9 @@ class Tracker:
         if np.mod(self.num_seeds, self.track_batch_size) > 0:
             num_batches += 1
 
-        out_tractogram = self.streamline_tracking(data_handler, seed_points, num_batches)
+        out_streamlines = self.streamline_tracking(data_handler, seed_points, num_batches)
+        out_tractogram = streamlines.tractogram.Tractogram(streamlines=out_streamlines,
+                                                           affine_to_rasmm=np.eye(4))
         if self.save_tractogram:
             streamlines.save(tractogram=out_tractogram, filename=join(self.save_dir, 'out_tractogram.tck'))
 

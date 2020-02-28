@@ -2,7 +2,6 @@ from utils.train_utils import *
 from utils.Network import *
 from utils.data_handling import *
 from keras.losses import categorical_crossentropy
-from keras.optimizers import *
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from sklearn.model_selection import train_test_split
@@ -41,16 +40,16 @@ class Trainer(object):
         self.model_weights_save_dir = self.params['model_weights_save_dir']
         self.model_name = self.params['model_name']
         self.weights_file = join(self.model_weights_save_dir, self.model_name + '.hdf5')
+        self.model_file = join(self.model_weights_save_dir, self.model_name + '.json')
         self.data_handler = DataHandler(self.params, mode='train')
         self.save_checkpoints = self.params['save_checkpoints']
 
-    def get_model(self, grad_directions):
+    def set_model(self, grad_directions, max_streamline_length):
 
         # Num of steps in each batch
-        max_streamline_length = int(np.max(self.data_handler.tractogram._lengths))
         self.model = DeepTract_network(max_streamline_length, grad_directions, self.layers_size,
                                        self.output_size, self.use_dropout, self.dropout_prob)
-        return max_streamline_length
+        return
 
     def train(self):
 
@@ -64,9 +63,10 @@ class Trainer(object):
         vector_labels = get_geometrical_labels(data_handler.tractogram)
         x_train, x_valid, y_train, y_valid = train_test_split(data_handler.tractogram, vector_labels,
                                                               test_size=1-self.split_ratio)
+        seq_length = data_handler.max_streamline_length
 
         # Set model
-        time_steps = self.get_model(grad_directions)
+        self.set_model(grad_directions, seq_length)
 
         # Set optimizer
         optimizer = self.optimizer(lr=self.learning_rate)
@@ -99,9 +99,9 @@ class Trainer(object):
                              save_best_only=True,
                              mode='max'))
 
-        # Training process
+        # Train model
         train_history = self.model.fit_generator(
-                generator=train_generator(data_handler.dwi, x_train, y_train, time_steps, self.output_size,
+                generator=train_generator(data_handler.dwi, x_train, y_train, seq_length, self.output_size,
                                           self.batch_size, dwi_means),
                 steps_per_epoch=np.ceil(float(len(x_train)) / float(self.batch_size)),
                 epochs=self.epochs,
@@ -111,17 +111,10 @@ class Trainer(object):
                                                 self.batch_size, dwi_means),
                 validation_steps=np.ceil(float(len(x_valid)) / float(self.batch_size)))
 
-        # Save model
-        # final_weights_path = os.path.join(self.model_weights_save_dir, self.model_name + '.pt')
-        # self.logger.info('Saving final weights: %s', final_weights_path)
-        # torch.save(model.state_dict(), final_weights_path)
+        # Save model to file
+        save_model(self.model, self.model_file)
 
         return train_history
 
 
-def sequence_top_k_categorical_accuracy(y_true, y_pred, k=5):
-    original_shape = K.shape(y_true)
-    y_true = K.reshape(y_true, (-1, K.shape(y_true)[-1]))
-    y_pred = K.reshape(y_pred, (-1, K.shape(y_pred)[-1]))
-    top_k = K.cast(K.in_top_k(y_pred, K.argmax(y_true, axis=-1), k), K.floatx())
-    return K.reshape(top_k, original_shape[:-1])
+

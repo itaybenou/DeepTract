@@ -24,7 +24,6 @@ class DataHandler(object):
             self.tractogram_path = self.params['tractogram_path']
         else:
             self.tractogram_path = None
-        self.voxel_size = self.params['voxel_size']
         self.max_val = 255
 
         self.dwi = None
@@ -33,6 +32,7 @@ class DataHandler(object):
         self.brain_mask = np.array([])
         self.wm_mask = np.array([])
         self.tractogram = None
+        self.max_streamline_length = None
         if self.dwi_path is not None:
             self.load_dwi()
             self.load_b_table()
@@ -40,9 +40,9 @@ class DataHandler(object):
             self.brain_mask = self.load_mask(self.brain_mask_path)
         if self.wm_mask_path is not None:
             self.wm_mask = self.load_mask(self.wm_mask_path)
-            self.wm_mask = self.wm_mask[::2, ::2, ::2]
         if self.tractogram_path is not None:
             self.load_tractogram()
+            self.max_streamline_length = int(np.max(self.tractogram._lengths))
 
     def load_dwi(self):
         dwi_file = get_file_path(os.getcwd(), self.dwi_path, "*.nii*")
