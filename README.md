@@ -17,6 +17,7 @@ If you find this code useful in your research or publication, please cite the pa
 1) Clone/download repo.
 2) Edit the config.py file to configure the parameters according to the desired usage. Follow the comments above each parameter.
 3) Arrange the data: the DeepTract script expects a folder named "data" with the following folders/files structure:
+```
    data
        --- dwi
           --- <dwi_file>.nii
@@ -28,6 +29,7 @@ If you find this code useful in your research or publication, please cite the pa
           --- <brain_mask_file>.nii
        --- wm_mask
           --- <white_matter_mask>.nii
+```
 4) For training a new DeepTract model, run:
 ```
 deeptract.py --train
