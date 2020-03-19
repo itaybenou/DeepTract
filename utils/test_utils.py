@@ -135,7 +135,8 @@ INPUT: a binary WM mask - np array of size XxYxZ with "1" in WM voxels, "0" othw
 OUTPUT: seed_points - zero-padded np array of size n x 3, holding n random points within the WM_mask
 """
 
-    mask_idxs = 0.5 * np.array(np.nonzero(WM_mask)).T
+    # mask_idxs = 0.5 * np.array(np.nonzero(WM_mask)).T
+    mask_idxs = np.array(np.nonzero(WM_mask)).T
     seed_points = mask_idxs[random.sample(range(len(mask_idxs)), n_seeds)]
     return seed_points
 

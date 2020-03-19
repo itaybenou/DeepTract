@@ -1,5 +1,4 @@
 from utils.test_utils import *
-from utils.Network import *
 from utils.data_handling import *
 from os.path import join
 from keras.models import model_from_json
@@ -138,7 +137,8 @@ class Tracker:
                 if sum(1 * valids_mask) == 0:
                     break
 
-                inWM_mask = np.logical_and(inWM_mask, is_within_mask(2 * next_positions, dilated_wm_mask).astype(bool))
+                # inWM_mask = np.logical_and(inWM_mask, is_within_mask(2 * next_positions, dilated_wm_mask).astype(bool))
+                inWM_mask = np.logical_and(inWM_mask, is_within_mask(next_positions, dilated_wm_mask).astype(bool))
 
                 for k in list(compress(range(len(valids_mask)), valids_mask)):
                     batch_streamlines[k] = np.vstack((batch_streamlines[k], next_positions[k, :]))

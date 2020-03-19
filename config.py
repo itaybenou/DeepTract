@@ -21,7 +21,7 @@ class Parameters(object):
         self.params['model_name'] = 'DeepTract'
 
         # model_weights_save_dir - (string) Path for saving the model's files after training is done.
-        self.params['model_weights_save_dir'] = "D:/itay/Dev/Repos/DeepTract/trained_model"
+        self.params['model_weights_save_dir'] = # Enter path here
 
         """ Training Parameters """
 
@@ -60,11 +60,11 @@ class Parameters(object):
         """ Data Parameters """
 
         # DWI_path - (string) Path to the input DWI directory (should include .nii, .bvecs and .bvals files).
-        self.params['DWI_path'] = "D:/itay/Dev/Repos/DeepTract/data/dwi"
+        self.params['DWI_path'] = # Enter path here
 
         # tractogram_path - (string) Path to a tractogram (.trk file) to be used as training labels.
         # NOTE: only relevant for training, not for tracking stage.
-        self.params['tractogram_path'] = "D:/itay/Dev/Repos/DeepTract/data/labels/tractography.trk"
+        self.params['tractogram_path'] = # Enter path here
 
         # train_val_ratio - (float [0, 1]) Training/Validation split ratio for training.
         # NOTE: only relevant for training, not for tracking stage.
@@ -72,16 +72,16 @@ class Parameters(object):
 
         # brain_mask_path - (string) Path to a binary brain mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
-        self.params['brain_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/mask/brain_mask.nii.gz"
+        self.params['brain_mask_path'] = # Enter path here
 
         # wm_mask_path - (string) Path to a binary white natter mask file that will be applied to the input DWI volume.
         # Insert None if such mask is not available.
-        self.params['wm_mask_path'] = "D:/itay/Dev/Repos/DeepTract/data/wm_mask/wm_mask_resampled.nii.gz"
+        self.params['wm_mask_path'] = # Enter path here
 
         """ Tracking (post-training tractography) Parameters """
 
         # model_load_path - Path to the trained model's files (should include a .json and .hdf5 files).
-        self.params['trained_model_dir'] = "D:/itay/Dev/Repos/DeepTract/trained_model"
+        self.params['trained_model_dir'] = # Enter path here
 
         # tractography_type - (string) 'deterministic' or 'probabilistic'
         self.params['tractography_type'] = 'deterministic'
@@ -90,10 +90,10 @@ class Parameters(object):
         self.params['save_tractogram'] = True
 
         # save_dir - (boolean) full path for saving the output tractogram
-        self.params['save_dir'] = "D:/itay/Dev"
+        self.params['save_dir'] = # Enter path here
 
         # num_seeds - (int) Number of seed points for tractography.
-        self.params['num_seeds'] = 1100
+        self.params['num_seeds'] = 100000
 
         # track_batch_size - (int) Number of streamlines tracked simultaneously.
         self.params['track_batch_size'] = 500

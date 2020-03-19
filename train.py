@@ -107,7 +107,7 @@ class Trainer(object):
                 epochs=self.epochs,
                 verbose=1,
                 callbacks=callbacks,
-                validation_data=valid_generator(data_handler.dwi, x_valid, y_valid, self.output_size, self.output_size,
+                validation_data=valid_generator(data_handler.dwi, x_valid, y_valid, seq_length, self.output_size,
                                                 self.batch_size, dwi_means),
                 validation_steps=np.ceil(float(len(x_valid)) / float(self.batch_size)))
 
