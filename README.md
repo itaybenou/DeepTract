@@ -1,10 +1,8 @@
 # DeepTract
 This work code is the implementation of the method proposed in Benou and Riklin-Raviv "DeepTract: A Probabilistic Deep Learning Framework for White Matter Fiber Tractography" https://arxiv.org/abs/1812.05129. 
-
 ----------
-![Alt text](tracking_examples/DeepTract1.png?raw=true "Title")
+![Alt text](tracking_examples/DeepTract1.png?raw=true "Title") ![Alt text](tracking_examples/DeepTract2.png?raw=true "Title")
 ----------
-
 If you find this code useful in your research or publication, please cite the paper:
 ```
 @inproceedings{benou2019deeptract,
